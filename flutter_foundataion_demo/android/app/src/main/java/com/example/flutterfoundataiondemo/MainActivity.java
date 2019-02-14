@@ -1,4 +1,4 @@
-package com.example.flutterfoundationlearning;
+package com.example.flutterfoundataiondemo;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

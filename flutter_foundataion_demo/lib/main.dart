@@ -169,9 +169,10 @@ class ShopItem extends StatelessWidget {
 }
 
 class ShoppingList extends StatefulWidget {
-  ShoppingList({Key key, this.products}) : super(key: key);
+  ShoppingList({Key key, this.products, this.choices}) : super(key: key);
 
   final List<Product> products;
+  final List<Choice> choices;
 
   @override
   State<StatefulWidget> createState() {
@@ -181,6 +182,7 @@ class ShoppingList extends StatefulWidget {
 
 class ShoppingListState extends State<ShoppingList> {
   Set<Product> _shoppingCart = new Set<Product>();
+  int selectedIndex = 0;
 
   void _onCartChanged(Product product, bool inCart) {
     setState(() {
@@ -192,17 +194,152 @@ class ShoppingListState extends State<ShoppingList> {
     });
   }
 
+  Widget _listView() {
+    Widget list = new ListView(
+      children: widget.products.map((Product product) {
+        return new ShopItem(
+            product: product,
+            inCart: _shoppingCart.contains(product),
+            onCartChanged: _onCartChanged);
+      }).toList(),
+    );
+    return list;
+  }
+
+  Widget _raisedButton() {
+    Widget button = new RaisedButton(
+      color: Colors.blue,
+      textColor: Colors.white,
+      child: new Text("BUTTON"),
+      padding: new EdgeInsets.all(10.0),
+      onPressed: () {
+        print('object');
+      },
+    );
+    return button;
+  }
+
+  Widget _flutterLogo() {
+    return new FlutterLogo(
+      style: FlutterLogoStyle.stacked,
+    );
+  }
+
+  Widget _placeholder() {
+    return new SizedBox(
+      width: 100,
+      height: 100,
+      child: new Placeholder(
+        color: Colors.grey,
+      ),
+    );
+  }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return new Scaffold(
+  //     appBar: new AppBar(title: new Text('ShopCart')),
+  //     body: new Center(
+  //       child: new TabBar(tabs: <Widget>[new Text('1')], controller: new TabController(length: 1, vsync: TickerProvider()),),
+  //     ),
+  //     bottomNavigationBar: BottomNavigationBar(
+  //       items: <BottomNavigationBarItem>[
+  //         BottomNavigationBarItem(title: Text('Contact'), icon: Icon(Icons.contact_phone)),
+  //         BottomNavigationBarItem(title: Text('Email'), icon: Icon(Icons.contact_mail)),
+  //       ],
+  //       onTap: (int idx) {
+  //         setState(() {
+  //           selectedIndex = idx;
+  //         });
+  //       },
+  //       currentIndex: selectedIndex,
+  //     ),
+  //     floatingActionButton: FloatingActionButton(
+  //       child: Icon(Icons.add),
+  //     ),
+  //     floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+  //   );
+  // }
+
+  List<Choice> choices = [
+    Choice(title: 'Cake', icon: Icon(Icons.cake)),
+    Choice(title: 'Face', icon: Icon(Icons.face)),
+    Choice(title: 'Place', icon: Icon(Icons.place)),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        appBar: new AppBar(title: new Text('ShopCart')),
-        body: new ListView(
-          children: widget.products.map((Product product) {
-            return new ShopItem(
-                product: product,
-                inCart: _shoppingCart.contains(product),
-                onCartChanged: _onCartChanged);
+    return new DefaultTabController(
+      length: choices.length,
+      child: new Scaffold(
+        appBar: AppBar(
+            title: Text("Tabbar"),
+            bottom: TabBar(
+              tabs: choices.map((Choice choice) {
+                return Tab(
+                  text: choice.title,
+                  icon: choice.icon,
+                );
+              }).toList(),
+            )),
+        body: TabBarView(
+          children: choices.map((Choice choice) {
+            return Center(
+              child: Text(choice.title),
+            );
           }).toList(),
-        ));
+        ),
+        drawer: Drawer(
+          child: Container(
+            child: Center(
+                child: ListView(
+              children: <Widget>[
+                Text(
+                  'I am drawer',
+                  textAlign: TextAlign.center,
+                ),
+                FlatButton(
+                  child: Text('FlatButton'),
+                  onPressed: () {},
+                  color: Colors.blue,
+                ),
+                IconButton(
+                  icon: Icon(Icons.today),
+                  onPressed: () {},
+                ),
+                PopupMenuButton(
+                  onSelected: (widget) {
+                    print('widget');
+                  },
+                  onCanceled: () {
+                    print('Canceled');
+                  },
+                  itemBuilder: (BuildContext build) {
+                    return [
+                      PopupMenuItem(
+                        child: Text('one'),
+                      ),
+                      PopupMenuItem(
+                        child: Text('two'),
+                      ),
+                      PopupMenuItem(
+                        child: Text('three'),
+                      ),
+                    ];
+                  },
+                ),
+                ButtonBar(children: <Widget>[Text('1'), Text('2'), Text('3')], alignment: MainAxisAlignment.center,)
+              ],
+            )),
+          ),
+        ),
+      ),
+    );
   }
+}
+
+class Choice {
+  const Choice({this.title, this.icon});
+  final String title;
+  final Icon icon;
 }

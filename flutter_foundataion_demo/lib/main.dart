@@ -183,6 +183,11 @@ class ShoppingList extends StatefulWidget {
 class ShoppingListState extends State<ShoppingList> {
   Set<Product> _shoppingCart = new Set<Product>();
   int selectedIndex = 0;
+  bool checked = false;
+  String radioSelectedValue = '1';
+  bool switchOn = true;
+  double sliderValue = 0.3;
+  int expandPanelHeaderSelectIndex = -1;
 
   void _onCartChanged(Product product, bool inCart) {
     setState(() {
@@ -328,7 +333,191 @@ class ShoppingListState extends State<ShoppingList> {
                     ];
                   },
                 ),
-                ButtonBar(children: <Widget>[Text('1'), Text('2'), Text('3')], alignment: MainAxisAlignment.center,)
+                ButtonBar(
+                  children: <Widget>[Text('1'), Text('2'), Text('3')],
+                  alignment: MainAxisAlignment.center,
+                ),
+                TextField(
+                  maxLines: null,
+                  maxLength: TextField.noMaxLength,
+                  maxLengthEnforced: true,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(color: Colors.grey, fontSize: 17),
+                  decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.book),
+                      suffixIcon: Icon(Icons.book),
+                      border: InputBorder.none),
+                ),
+                Checkbox(
+                  value: checked,
+                  onChanged: (bool boxChecked) {
+                    setState(() {
+                      checked = boxChecked;
+                    });
+                  },
+                ),
+                Radio(
+                  value: '1',
+                  groupValue: radioSelectedValue,
+                  onChanged: (String newValue) {
+                    setState(() {
+                      radioSelectedValue = newValue;
+                    });
+                  },
+                ),
+                Radio(
+                  value: '2',
+                  groupValue: radioSelectedValue,
+                  onChanged: (String newValue) {
+                    setState(() {
+                      radioSelectedValue = newValue;
+                    });
+                  },
+                ),
+                Radio(
+                  value: '3',
+                  groupValue: radioSelectedValue,
+                  onChanged: (String newValue) {
+                    setState(() {
+                      radioSelectedValue = newValue;
+                    });
+                  },
+                ),
+                Center(
+                  child: Switch(
+                    value: switchOn,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        switchOn = newValue;
+                      });
+                    },
+                  ),
+                ),
+                Slider(
+                  value: sliderValue,
+                  onChanged: (double newValue) {
+                    setState(() {
+                      sliderValue = newValue;
+                    });
+                  },
+                  activeColor: Colors.red,
+                  inactiveColor: Colors.grey,
+                ),
+                RaisedButton(
+                  child: Text('showTimePicker'),
+                  onPressed: () {
+                    // showDatePicker(
+                    //     firstDate: DateTime(2017),
+                    //     initialDate: DateTime(2018, 08, 03),
+                    //     lastDate: DateTime.now(),
+                    //     context: context);
+
+                    showTimePicker(
+                        context: context, initialTime: TimeOfDay.now());
+                  },
+                ),
+                SimpleDialog(
+                  title: Text('title'),
+                  children: <Widget>[
+                    SimpleDialogOption(
+                      child: Text('Cancel'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    SimpleDialogOption(
+                      child: Text('OK'),
+                    )
+                  ],
+                ),
+                RaisedButton(
+                  child: const Text('showDialog'),
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AboutDialog();
+                        });
+                  },
+                ),
+                AlertDialog(
+                  title: const Text('Alert'),
+                  content: Center(
+                    child: TextField(),
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: const Text('Cancel'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    FlatButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                    FlatButton(
+                      child: const Text('OK'),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ),
+                RaisedButton(
+                  child: const Text('showBottomSheet'),
+                  onPressed: () {
+                    showModalBottomSheet(
+                        builder: (BuildContext context) {
+                          return ListView(
+                            children: <Widget>[
+                              const Text('1'),
+                              const Text('2'),
+                              const Text('3'),
+                            ],
+                          );
+                        },
+                        context: context);
+                  },
+                ),
+                Container(
+                  child: ExpansionPanelList(
+                    children: [
+                      ExpansionPanel(
+                        isExpanded: expandPanelHeaderSelectIndex == 0,
+                        headerBuilder: (BuildContext context, bool expanded) {
+                          return GestureDetector(
+                            child: Container(
+                              child: FlatButton(child: const Text('header0'), onPressed: (){
+                                  setState(() {
+                                    expandPanelHeaderSelectIndex = 0;
+                                  });
+                              },),
+                            ),
+                          );
+                        },
+                        body: const Text('body0'),
+                      ),
+                      ExpansionPanel(
+                        isExpanded: expandPanelHeaderSelectIndex == 1,
+                        headerBuilder: (BuildContext context, bool expanded) {
+                          return GestureDetector(
+                            child: Container(
+                              child: FlatButton(child: const Text('header1'), onPressed: (){
+                                  setState(() {
+                                    expandPanelHeaderSelectIndex = 1;
+                                  });
+                              },),
+                            ),
+                          );
+                        },
+                        body: const Text('body1'),
+                      )
+                    ],
+                  ),
+                )
               ],
             )),
           ),

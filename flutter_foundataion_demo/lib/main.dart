@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'SecondScreen.dart';
+import 'ThirdScreen.dart';
+import 'FourthScreen.dart';
 
 void main() {
   runApp(MyApp());
@@ -7,6 +11,16 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  Widget _shopListWidget () {
+    return new ShoppingList(
+        products: <Product>[
+          new Product(name: 'fish'),
+          new Product(name: 'milk'),
+          new Product(name: 'bread'),
+        ],
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,13 +39,12 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: new ShoppingList(
-        products: <Product>[
-          new Product(name: 'fish'),
-          new Product(name: 'milk'),
-          new Product(name: 'bread'),
-        ],
-      ),
+      home: _shopListWidget(),
+      routes: <String, WidgetBuilder> {
+        '/a' : (context)=>SecondScreen(),
+        '/b' : (context)=>ThirdScreen(),
+        '/c' : (context)=>FourthScreen(),
+      },
     );
   }
 }
@@ -181,6 +194,7 @@ class ShoppingList extends StatefulWidget {
 }
 
 class ShoppingListState extends State<ShoppingList> {
+  var _scaffoldKey = new GlobalKey<ScaffoldState>();
   Set<Product> _shoppingCart = new Set<Product>();
   int selectedIndex = 0;
   bool checked = false;
@@ -188,6 +202,9 @@ class ShoppingListState extends State<ShoppingList> {
   bool switchOn = true;
   double sliderValue = 0.3;
   int expandPanelHeaderSelectIndex = -1;
+  var networkPictureSrc =
+      'https://github.com/flutter/plugins/raw/master/packages/video_player/doc/demo_ipod.gif?raw=true';
+  var _currentStep = 0;
 
   void _onCartChanged(Product product, bool inCart) {
     setState(() {
@@ -272,13 +289,481 @@ class ShoppingListState extends State<ShoppingList> {
     Choice(title: 'Place', icon: Icon(Icons.place)),
   ];
 
+  TabBarView _createTabbarView() {
+    return TabBarView(
+      children: choices.map((Choice choice) {
+        return Center(
+          child: Text(choice.title),
+        );
+      }).toList(),
+    );
+  }
+
+  ListView _createLongListView() {
+    var _list = List<String>.generate(10000, (i) => 'Item $i');
+
+    return ListView.builder(
+      itemCount: 10000,
+      itemBuilder: (BuildContext context, int i) {
+        return i % 6 == 0
+            ? ListTile(
+                title: Text(
+                _list[i],
+                style: TextStyle(color: Colors.red),
+              ))
+            : ListTile(
+                title: Text(
+                _list[i],
+                style: TextStyle(color: Colors.green),
+              ));
+      },
+    );
+  }
+
+  GridView _createGridView() {
+    return GridView.count(
+        crossAxisCount: 2,
+        children: new List.generate(100, (int index) {
+          return Container(
+            child: Center(
+              child: Text(
+                '$index',
+                style: TextStyle(color: Colors.white, fontSize: 27),
+              ),
+            ),
+            color: Colors.primaries[index % 16],
+          );
+        }));
+  }
+
+  InkWell _createInkWell() {
+    return InkWell(
+      highlightColor: Colors.red,
+      splashColor: Colors.green,
+      onTap: () {},
+      child: Container(
+        height: 100,
+        width: 100,
+        padding: EdgeInsets.all(8),
+        child: Center(
+          child: const Text('InkWellButton'),
+        ),
+      ),
+    );
+  }
+
+  Widget _createDrawerContent() {
+    return Container(
+      child: Center(
+          child: ListView(
+        children: <Widget>[
+          Text(
+            'I am drawer',
+            textAlign: TextAlign.center,
+          ),
+          FlatButton(
+            child: Text('FlatButton'),
+            onPressed: () {},
+            color: Colors.blue,
+          ),
+          IconButton(
+            icon: Icon(Icons.today),
+            onPressed: () {},
+          ),
+          PopupMenuButton(
+            onSelected: (widget) {
+              print('widget');
+            },
+            onCanceled: () {
+              print('Canceled');
+            },
+            itemBuilder: (BuildContext build) {
+              return [
+                PopupMenuItem(
+                  child: Text('one'),
+                ),
+                PopupMenuItem(
+                  child: Text('two'),
+                ),
+                PopupMenuItem(
+                  child: Text('three'),
+                ),
+              ];
+            },
+          ),
+          ButtonBar(
+            children: <Widget>[Text('1'), Text('2'), Text('3')],
+            alignment: MainAxisAlignment.center,
+          ),
+          TextField(
+            maxLines: null,
+            maxLength: TextField.noMaxLength,
+            maxLengthEnforced: true,
+            keyboardType: TextInputType.number,
+            style: TextStyle(color: Colors.grey, fontSize: 17),
+            decoration: InputDecoration(
+                prefixIcon: Icon(Icons.book),
+                suffixIcon: Icon(Icons.book),
+                border: InputBorder.none),
+          ),
+          Checkbox(
+            value: checked,
+            onChanged: (bool boxChecked) {
+              setState(() {
+                checked = boxChecked;
+              });
+            },
+          ),
+          Radio(
+            value: '1',
+            groupValue: radioSelectedValue,
+            onChanged: (String newValue) {
+              setState(() {
+                radioSelectedValue = newValue;
+              });
+            },
+          ),
+          Radio(
+            value: '2',
+            groupValue: radioSelectedValue,
+            onChanged: (String newValue) {
+              setState(() {
+                radioSelectedValue = newValue;
+              });
+            },
+          ),
+          Radio(
+            value: '3',
+            groupValue: radioSelectedValue,
+            onChanged: (String newValue) {
+              setState(() {
+                radioSelectedValue = newValue;
+              });
+            },
+          ),
+          Center(
+            child: Switch(
+              value: switchOn,
+              onChanged: (bool newValue) {
+                setState(() {
+                  switchOn = newValue;
+                });
+              },
+            ),
+          ),
+          Slider(
+            value: sliderValue,
+            onChanged: (double newValue) {
+              setState(() {
+                sliderValue = newValue;
+              });
+            },
+            activeColor: Colors.red,
+            inactiveColor: Colors.grey,
+          ),
+          RaisedButton(
+            child: Text('showTimePicker'),
+            onPressed: () {
+              // showDatePicker(
+              //     firstDate: DateTime(2017),
+              //     initialDate: DateTime(2018, 08, 03),
+              //     lastDate: DateTime.now(),
+              //     context: context);
+
+              showTimePicker(context: context, initialTime: TimeOfDay.now());
+            },
+          ),
+          SimpleDialog(
+            title: Text('title'),
+            children: <Widget>[
+              SimpleDialogOption(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              SimpleDialogOption(
+                child: Text('OK'),
+              )
+            ],
+          ),
+          RaisedButton(
+            child: const Text('showDialog'),
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AboutDialog();
+                  });
+            },
+          ),
+          AlertDialog(
+            title: const Text('Alert'),
+            content: Center(
+              child: TextField(),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          ),
+          RaisedButton(
+            child: const Text('showBottomSheet'),
+            onPressed: () {
+              showModalBottomSheet(
+                  builder: (BuildContext context) {
+                    return ListView(
+                      children: <Widget>[
+                        const Text('1'),
+                        const Text('2'),
+                        const Text('3'),
+                      ],
+                    );
+                  },
+                  context: context);
+            },
+          ),
+          Container(
+            child: ExpansionPanelList(
+              children: [
+                ExpansionPanel(
+                  isExpanded: expandPanelHeaderSelectIndex == 0,
+                  headerBuilder: (BuildContext context, bool expanded) {
+                    return GestureDetector(
+                      child: Container(
+                        child: FlatButton(
+                          child: const Text('header0'),
+                          onPressed: () {
+                            setState(() {
+                              expandPanelHeaderSelectIndex = 0;
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  body: const Text('body0'),
+                ),
+                ExpansionPanel(
+                  isExpanded: expandPanelHeaderSelectIndex == 1,
+                  headerBuilder: (BuildContext context, bool expanded) {
+                    return GestureDetector(
+                      child: Container(
+                        child: FlatButton(
+                          child: const Text('header1'),
+                          onPressed: () {
+                            setState(() {
+                              expandPanelHeaderSelectIndex = 1;
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  body: const Text('body1'),
+                )
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 100,
+            width: 200,
+            child: Image.network(networkPictureSrc,
+                width: 50, height: 25, fit: BoxFit.contain),
+          ),
+          // SizedBox(
+          //     height: 100,
+          //     width: 200,
+          //     child: CachedNetworkImage(
+          //       placeholder: Image.asset('images/timg.jpeg'),
+          //       imageUrl: networkPictureSrc,
+          //     )),
+          Icon(Icons.ac_unit),
+          Chip(
+            avatar: CircleAvatar(
+              backgroundColor: Colors.grey.shade800,
+              child: Text('AB'),
+            ),
+            label: Text('Aaron Burr'),
+            deleteIcon: Icon(Icons.delete),
+            deleteIconColor: Colors.black,
+          ),
+          InputChip(
+            avatar: CircleAvatar(
+              backgroundColor: Colors.grey.shade800,
+              child: Text('AB'),
+            ),
+            label: Text('InputChip'),
+            onPressed: () {},
+            deleteIcon: Icon(Icons.delete),
+            deleteIconColor: Colors.black,
+          ),
+          ChoiceChip(
+            selected: true,
+            label: Text('ChoiceChip'),
+            onSelected: (bool newValue) {
+              print(newValue);
+            },
+          ),
+          ActionChip(
+            label: Text('ChoiceChip'),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: Icon(Icons.desktop_mac),
+            onPressed: () {},
+            tooltip: 'Tooltip()',
+          ),
+          DataTable(
+            columns: [
+              DataColumn(label: Text('column0')),
+              DataColumn(label: Text('column1')),
+              DataColumn(label: Text('column2'))
+            ],
+            rows: [
+              DataRow(cells: [
+                DataCell(Text('cell00')),
+                DataCell(Text('cell01')),
+                DataCell(Text('cell02'))
+              ]),
+              DataRow(cells: [
+                DataCell(Text('cell10')),
+                DataCell(Text('cell11')),
+                DataCell(Text('cell12'))
+              ]),
+              DataRow(cells: [
+                DataCell(Text('cell20')),
+                DataCell(Text('cell21')),
+                DataCell(Text('cell22'))
+              ]),
+            ],
+          ),
+          Card(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: CircleAvatar(
+                backgroundColor: Colors.green,
+              ),
+            ),
+          ),
+          LinearProgressIndicator(
+            value: 0.5,
+            backgroundColor: Colors.grey,
+          ),
+          ListTile(
+            leading: const Text('leading'),
+            title: const Text('title'),
+            subtitle: const Text('sub title'),
+            trailing: Icon(Icons.adb),
+          ),
+          Stepper(
+            controlsBuilder: (BuildContext context,
+                {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+              return Row(
+                children: <Widget>[
+                  FlatButton(
+                    child: const Text('Cancel'),
+                    onPressed: () {
+                      print('onStepCancel');
+                    },
+                  ),
+                  FlatButton(
+                    child: const Text('Continue'),
+                    onPressed: () {
+                      print('onStepContinue');
+                    },
+                  ),
+                ],
+              );
+            },
+            onStepCancel: () {
+              print('onStepCancel');
+            },
+            onStepContinue: () {
+              setState(() {
+                _currentStep++;
+              });
+              print('onStepContinue');
+            },
+            currentStep: _currentStep,
+            onStepTapped: (int stepIndex) {
+              setState(() {
+                _currentStep = stepIndex;
+              });
+            },
+            steps: <Step>[
+              Step(
+                  title: Text('step1 title'),
+                  subtitle: Text('step1 subTitle'),
+                  content: Text('step content 1')),
+              Step(title: Text('step2'), content: Text('step content 2')),
+              Step(title: Text('step3'), content: Text('step content 3')),
+              Step(title: Text('step4'), content: Text('step content 4')),
+            ],
+          ),
+          Divider(
+            indent: 50,
+          ),
+          SizedBox(
+            child: Container(
+              color: Colors.grey,
+            ),
+            height: 100,
+            width: 100,
+          ),
+          Divider(
+            indent: 50,
+          ),
+          InkWell(
+            highlightColor: Colors.red,
+            splashColor: Colors.green,
+            onTap: () {},
+            child: Container(
+              constraints: BoxConstraints.tight(Size(40, 20)),
+              child: Center(
+                child: const Text('InkWellButton'),
+              ),
+            ),
+          ),
+        ],
+      )),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return new DefaultTabController(
       length: choices.length,
       child: new Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
-            title: Text("Tabbar"),
+            title: GestureDetector(
+                child: Text("Tabbar"),
+                onTap: () async {
+                  final result = await Navigator.pushNamed(context, '/a');
+                  print(result);
+                  // _scaffoldKey.currentState.showSnackBar(SnackBar(
+                  //   content: Text('Message'),
+                  //   duration: Duration(milliseconds: 500),
+                  // ));
+                }),
             bottom: TabBar(
               tabs: choices.map((Choice choice) {
                 return Tab(
@@ -287,239 +772,10 @@ class ShoppingListState extends State<ShoppingList> {
                 );
               }).toList(),
             )),
-        body: TabBarView(
-          children: choices.map((Choice choice) {
-            return Center(
-              child: Text(choice.title),
-            );
-          }).toList(),
-        ),
+        body: _createGridView(),
         drawer: Drawer(
           child: Container(
-            child: Center(
-                child: ListView(
-              children: <Widget>[
-                Text(
-                  'I am drawer',
-                  textAlign: TextAlign.center,
-                ),
-                FlatButton(
-                  child: Text('FlatButton'),
-                  onPressed: () {},
-                  color: Colors.blue,
-                ),
-                IconButton(
-                  icon: Icon(Icons.today),
-                  onPressed: () {},
-                ),
-                PopupMenuButton(
-                  onSelected: (widget) {
-                    print('widget');
-                  },
-                  onCanceled: () {
-                    print('Canceled');
-                  },
-                  itemBuilder: (BuildContext build) {
-                    return [
-                      PopupMenuItem(
-                        child: Text('one'),
-                      ),
-                      PopupMenuItem(
-                        child: Text('two'),
-                      ),
-                      PopupMenuItem(
-                        child: Text('three'),
-                      ),
-                    ];
-                  },
-                ),
-                ButtonBar(
-                  children: <Widget>[Text('1'), Text('2'), Text('3')],
-                  alignment: MainAxisAlignment.center,
-                ),
-                TextField(
-                  maxLines: null,
-                  maxLength: TextField.noMaxLength,
-                  maxLengthEnforced: true,
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(color: Colors.grey, fontSize: 17),
-                  decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.book),
-                      suffixIcon: Icon(Icons.book),
-                      border: InputBorder.none),
-                ),
-                Checkbox(
-                  value: checked,
-                  onChanged: (bool boxChecked) {
-                    setState(() {
-                      checked = boxChecked;
-                    });
-                  },
-                ),
-                Radio(
-                  value: '1',
-                  groupValue: radioSelectedValue,
-                  onChanged: (String newValue) {
-                    setState(() {
-                      radioSelectedValue = newValue;
-                    });
-                  },
-                ),
-                Radio(
-                  value: '2',
-                  groupValue: radioSelectedValue,
-                  onChanged: (String newValue) {
-                    setState(() {
-                      radioSelectedValue = newValue;
-                    });
-                  },
-                ),
-                Radio(
-                  value: '3',
-                  groupValue: radioSelectedValue,
-                  onChanged: (String newValue) {
-                    setState(() {
-                      radioSelectedValue = newValue;
-                    });
-                  },
-                ),
-                Center(
-                  child: Switch(
-                    value: switchOn,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        switchOn = newValue;
-                      });
-                    },
-                  ),
-                ),
-                Slider(
-                  value: sliderValue,
-                  onChanged: (double newValue) {
-                    setState(() {
-                      sliderValue = newValue;
-                    });
-                  },
-                  activeColor: Colors.red,
-                  inactiveColor: Colors.grey,
-                ),
-                RaisedButton(
-                  child: Text('showTimePicker'),
-                  onPressed: () {
-                    // showDatePicker(
-                    //     firstDate: DateTime(2017),
-                    //     initialDate: DateTime(2018, 08, 03),
-                    //     lastDate: DateTime.now(),
-                    //     context: context);
-
-                    showTimePicker(
-                        context: context, initialTime: TimeOfDay.now());
-                  },
-                ),
-                SimpleDialog(
-                  title: Text('title'),
-                  children: <Widget>[
-                    SimpleDialogOption(
-                      child: Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    SimpleDialogOption(
-                      child: Text('OK'),
-                    )
-                  ],
-                ),
-                RaisedButton(
-                  child: const Text('showDialog'),
-                  onPressed: () {
-                    showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AboutDialog();
-                        });
-                  },
-                ),
-                AlertDialog(
-                  title: const Text('Alert'),
-                  content: Center(
-                    child: TextField(),
-                  ),
-                  actions: <Widget>[
-                    FlatButton(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    FlatButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    FlatButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    )
-                  ],
-                ),
-                RaisedButton(
-                  child: const Text('showBottomSheet'),
-                  onPressed: () {
-                    showModalBottomSheet(
-                        builder: (BuildContext context) {
-                          return ListView(
-                            children: <Widget>[
-                              const Text('1'),
-                              const Text('2'),
-                              const Text('3'),
-                            ],
-                          );
-                        },
-                        context: context);
-                  },
-                ),
-                Container(
-                  child: ExpansionPanelList(
-                    children: [
-                      ExpansionPanel(
-                        isExpanded: expandPanelHeaderSelectIndex == 0,
-                        headerBuilder: (BuildContext context, bool expanded) {
-                          return GestureDetector(
-                            child: Container(
-                              child: FlatButton(child: const Text('header0'), onPressed: (){
-                                  setState(() {
-                                    expandPanelHeaderSelectIndex = 0;
-                                  });
-                              },),
-                            ),
-                          );
-                        },
-                        body: const Text('body0'),
-                      ),
-                      ExpansionPanel(
-                        isExpanded: expandPanelHeaderSelectIndex == 1,
-                        headerBuilder: (BuildContext context, bool expanded) {
-                          return GestureDetector(
-                            child: Container(
-                              child: FlatButton(child: const Text('header1'), onPressed: (){
-                                  setState(() {
-                                    expandPanelHeaderSelectIndex = 1;
-                                  });
-                              },),
-                            ),
-                          );
-                        },
-                        body: const Text('body1'),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            )),
+            child: _createInkWell(),
           ),
         ),
       ),

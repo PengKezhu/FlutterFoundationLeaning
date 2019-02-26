@@ -12,8 +12,20 @@ class SecondScreen extends StatefulWidget {
   }
 }
 
-class SecondScreenState extends State<SecondScreen> {
+class SecondScreenState extends State<SecondScreen>
+    with WidgetsBindingObserver {
   List _items = ['网络请求'];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
 
   void _handleTap(String item) {
     // Navigator.pop(context, item);
@@ -28,7 +40,9 @@ class SecondScreenState extends State<SecondScreen> {
       title: 'SecondScreen',
       home: Scaffold(
         appBar: AppBar(
-            title: widget.title != null ? Text(widget.title) : Text('no title specified'),
+            title: widget.title != null
+                ? Text(widget.title)
+                : Text('no title specified'),
             leading: GestureDetector(
               child: Icon(Icons.arrow_back_ios),
               onTap: () => Navigator.pop(context),

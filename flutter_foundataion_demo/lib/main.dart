@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+// import 'package:cached_network_image/cached_network_image.dart';
 import 'SecondScreen.dart';
 import 'ThirdScreen.dart';
 import 'FourthScreen.dart';
@@ -11,15 +11,15 @@ void main() {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-
-  Widget _shopListWidget () {
+  
+  Widget _shopListWidget() {
     return new ShoppingList(
-        products: <Product>[
-          new Product(name: 'fish'),
-          new Product(name: 'milk'),
-          new Product(name: 'bread'),
-        ],
-      );
+      products: <Product>[
+        new Product(name: 'fish'),
+        new Product(name: 'milk'),
+        new Product(name: 'bread'),
+      ],
+    );
   }
 
   @override
@@ -40,10 +40,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: _shopListWidget(),
-      routes: <String, WidgetBuilder> {
-        '/a' : (context)=>SecondScreen(),
-        '/b' : (context)=>ThirdScreen(),
-        '/c' : (context)=>FourthScreen(),
+      routes: <String, WidgetBuilder>{
+        '/a': (context) => SecondScreen(),
+        '/b': (context) => ThirdScreen(),
+        '/c': (context) => FourthScreen(),
       },
     );
   }
